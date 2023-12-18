@@ -1,0 +1,17 @@
+proxies:
+  type: http
+  url: https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt
+cookies:
+  url: https://example.com/cookie.txt
+points:
+  home:
+    lat: 60.050917
+    lng: 30.437703
+  work:
+    lat: 60.050917
+    lng: 30.437703
+database:
+  address: 127.0.0.1:9000
+  database: default
+  username: default
+  password: passwd
