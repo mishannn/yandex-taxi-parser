@@ -135,7 +135,12 @@ func getMoscowTaxiRouteWithProxies(proxyURLs []string, cookie string, from Coord
 					return
 				}
 
-				resultCh <- taxiInfo
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					resultCh <- taxiInfo
+				}
 			}()
 		}
 
