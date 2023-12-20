@@ -86,7 +86,7 @@ func runApplication() int {
 		logger.Error("can't get taxi info", zap.String("direction", "to_work"), zap.Error(err))
 		wasError = true
 	} else {
-		err = saveTaxiInfo(db, collectTime, "work", "home", taxiInfoFromHomeToWork, homeWeather)
+		err = saveTaxiInfo(db, collectTime, "home", "work", taxiInfoFromHomeToWork, homeWeather)
 		if err != nil {
 			logger.Error("can't write route from home to work", zap.Error(err))
 			wasError = true
