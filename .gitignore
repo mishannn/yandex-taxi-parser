@@ -21,7 +21,7 @@
 go.work
 
 # Build
-/yandex_taxi_parser
+/yandex-taxi-parser
 
 # Config file
 config.yaml
