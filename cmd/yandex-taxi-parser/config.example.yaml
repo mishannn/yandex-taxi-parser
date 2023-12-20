@@ -10,6 +10,8 @@ points:
   work:
     lat: 60.050917
     lng: 30.437703
+openweather:
+  apikey: apikey
 database:
   address: 127.0.0.1:9000
   database: default

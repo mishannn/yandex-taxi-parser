@@ -19,6 +19,9 @@ type Config struct {
 		Home Coordinates `yaml:"home"`
 		Work Coordinates `yaml:"work"`
 	} `yaml:"points"`
+	OpenWeather struct {
+		APIKey string `yaml:"apikey"`
+	} `yaml:"openweather"`
 	Database struct {
 		Address  string `yaml:"address"`
 		Database string `yaml:"database"`

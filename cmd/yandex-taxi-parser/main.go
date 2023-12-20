@@ -14,6 +14,7 @@ import (
 func runApplication() int {
 	var configFilePath string
 	flag.StringVar(&configFilePath, "c", "config.yaml", "config file path")
+	flag.Parse()
 
 	logger, err := zap.NewProduction()
 	if err != nil {
@@ -56,17 +57,28 @@ func runApplication() int {
 
 	wasError := false
 
+	workWeather, err := GetWeather(cfg.OpenWeather.APIKey, cfg.Points.Work.Lat, cfg.Points.Work.Lng)
+	if err != nil {
+		logger.Error("can't get weather info", zap.String("direction", "to_home"), zap.Error(err))
+		wasError = true
+	}
+
 	taxiInfoFromWorkToHome, err := getMoscowTaxiRouteWithProxies(proxies, cookie, cfg.Points.Work, cfg.Points.Home)
 	if err != nil {
 		logger.Error("can't get taxi info", zap.String("direction", "to_home"), zap.Error(err))
 		wasError = true
 	} else {
-		_, err = db.Exec("INSERT INTO work_home_taxi_price (datetime, from, to, waiting_time, duration, price, is_surge) VALUES (?, ?, ?, ?, ?, ?, ?)",
-			collectTime, "work", "home", taxiInfoFromWorkToHome.WaitingTime, taxiInfoFromWorkToHome.Time/60, taxiInfoFromWorkToHome.Price, taxiInfoFromWorkToHome.IsSurge)
+		err = saveTaxiInfo(db, collectTime, "work", "home", taxiInfoFromWorkToHome, workWeather)
 		if err != nil {
 			logger.Error("can't write route from work to home", zap.Error(err))
 			wasError = true
 		}
+	}
+
+	homeWeather, err := GetWeather(cfg.OpenWeather.APIKey, cfg.Points.Home.Lat, cfg.Points.Home.Lng)
+	if err != nil {
+		logger.Error("can't get weather info", zap.String("direction", "to_home"), zap.Error(err))
+		wasError = true
 	}
 
 	taxiInfoFromHomeToWork, err := getMoscowTaxiRouteWithProxies(proxies, cookie, cfg.Points.Home, cfg.Points.Work)
@@ -74,8 +86,7 @@ func runApplication() int {
 		logger.Error("can't get taxi info", zap.String("direction", "to_work"), zap.Error(err))
 		wasError = true
 	} else {
-		_, err = db.Exec("INSERT INTO work_home_taxi_price (datetime, from, to, waiting_time, duration, price, is_surge) VALUES (?, ?, ?, ?, ?, ?, ?)",
-			collectTime, "home", "work", taxiInfoFromHomeToWork.WaitingTime, taxiInfoFromHomeToWork.Time/60, taxiInfoFromHomeToWork.Price, taxiInfoFromHomeToWork.IsSurge)
+		err = saveTaxiInfo(db, collectTime, "work", "home", taxiInfoFromHomeToWork, homeWeather)
 		if err != nil {
 			logger.Error("can't write route from home to work", zap.Error(err))
 			wasError = true
